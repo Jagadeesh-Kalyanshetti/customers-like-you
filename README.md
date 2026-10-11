@@ -10,7 +10,13 @@ Solo project: I hold both the Data Engineer and ML Engineer roles.
 4. The customer map shows clear groups marketing can name
 
 ## Data
-Raw file: online_retail_II.xlsx (row count: I still haven't loaded the dataset using code)
+Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and 2010-2011).
+
+- Rows: 1,067,371 invoice lines, 8 columns
+- Date range: 1 Dec 2009 to 9 Dec 2011
+- Raw distinct values: 5,942 customers, 5,305 stock codes
+- Missing: `CustomerID` on 22.77% of lines (243,007); `Description` on 0.41% (4,382)
+- Full tables: `outputs/data_profile.csv` and `outputs/data_summary.csv`
 
 ## Environment
 conda environment: miniproj

@@ -1,0 +1,9 @@
+,value
+rows,1067371
+date_min,2009-12-01 07:45:00
+date_max,2011-12-09 12:50:00
+cancellation_lines,19494
+quantity_non_positive,22950
+price_non_positive,6207
+distinct_customers,5942
+distinct_products,5305
