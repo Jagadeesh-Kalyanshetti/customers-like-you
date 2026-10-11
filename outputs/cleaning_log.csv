@@ -1,0 +1,8 @@
+rule,rows_removed,rows_remaining
+start,0,1067371
+cancellations,19494,1047877
+quantity,3457,1044420
+price,2750,1041670
+stockcodes,4793,1036877
+customerID,234245,802632
+total,264739,802632

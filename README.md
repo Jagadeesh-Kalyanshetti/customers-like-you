@@ -18,6 +18,12 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 - Missing: `CustomerID` on 22.77% of lines (243,007); `Description` on 0.41% (4,382)
 - Full tables: `outputs/data_profile.csv` and `outputs/data_summary.csv`
 
+### Cleaning (DE2)
+- Rows before cleaning: 1,067,371; after: 802,632; removed in total: 264,739
+- Rules applied in this order: cancellations, non-positive Quantity, non-positive Price, StockCodes that do not start with 5 digits, lines without a CustomerID
+- Rows removed per rule: `outputs/cleaning_log.csv`
+- Cleaned table: `data/processed/clean.parquet` (not committed, it contains customer IDs)
+
 ## Environment
 conda environment: miniproj
 
