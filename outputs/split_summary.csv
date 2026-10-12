@@ -1,0 +1,9 @@
+item,value
+cutoff,2011-10-09 12:50:00
+train_rows,684069
+test_candidate_rows,118563
+test_pairs_all,95018
+after_removing_repeats,63252
+after_removing_new_customers,49423
+after_removing_new_products,45753
+test_customers,1916
