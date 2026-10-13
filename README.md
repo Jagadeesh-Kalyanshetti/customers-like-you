@@ -49,7 +49,8 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 - Full report: `outputs/matrix_report.csv`, written by `src/DE5_matrix_report.py`
 
 ### Pipeline (DE6)
-- `src/DE6_run_all.py` runs the other scripts in `src/` in a fixed order: `DE1_load_data.py`, `DE2_clean_data.py`, `DE3_split_data.py`, `DE4_build_sparse_matrix.py`, `DE5_matrix_report.py`, `ML2_fit_svd.py`
+- `src/DE6_run_all.py` runs the other scripts in `src/` in a fixed order: `DE1_load_data.py`, `DE2_clean_data.py`, `DE3_split_data.py`, `DE4_build_sparse_matrix.py`, `DE5_matrix_report.py`, `ML2_fit_svd.py`, `ML4_evaluate.py`
+- `ML3_recommend.py` is not in the run, because it saves nothing; ML4 repeats its logic for all customers at once
 - Scripts don't share variables; each one reads the files the previous one saved in `data/processed/`
 - The brief calls this one-command rebuild `build_matrix.py`; mine is `DE6_run_all.py`, and it also runs the model scripts
 - Model scripts are named by task (`ML2_...` and so on)
@@ -74,6 +75,16 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 - Both functions return matrix column numbers; `product_index.parquet` turns them into StockCodes. Customer numbers are matrix row positions, not customer IDs
 - Quality is not tested here; the hit rate against the best-seller baseline comes in ML4
 
+### Evaluation and timing (ML4)
+- `src/ML4_evaluate.py` refits SVD at k = 200 (seed 42) and times the nightly job in three parts: the fit, the "also bought" box for all 3,687 products, and the top 10 new products for all 5,473 customers. The held-out pairs are loaded only after the timed part (R2)
+- Hit rate at 10 = share of test customers for whom at least one of their 10 suggestions is a held-out product. Test set: 1,913 customers and 44,727 held-out pairs
+- Baseline (R3): the 10 products with the most distinct buyers in train, skipping products the customer already bought. Same customers, same held-out pairs
+- Result: SVD hit rate 0.2148, best-seller baseline 0.2687. **SVD loses to the baseline by about 5.4 percentage points**, so success target 3 is not met. One test set and one run, so this is a measurement on this split, not a proven difference
+- Timing (single run on my MacBook, seconds): fit 0.42, all products 0.81, all customers 1.2, about 2.4 in total. Timings change slightly from run to run; the hit rates do not
+- k stayed at 200, because it was fixed in ML2 before any held-out scoring. Changing it after seeing these results would leak the test set into the model choice
+- Hypotheses for the loss, not tested: the held-out products are new to each customer and popular products are bought by many people, and suggestions built from a customer's own history lean towards niche products
+- File: `outputs/recommender_results.csv` (counts, rates and timings only, no customer IDs), written by `src/ML4_evaluate.py`
+
 ## Environment
 Python 3.14.8, in a conda environment named miniproj (conda 26.7.1; conda is optional, any Python environment works).
 
@@ -83,7 +94,7 @@ Packages and exact versions are in `requirements.txt`: matplotlib, numpy, openpy
 1. Use Python 3.14 (I used 3.14.8) and install the packages: `pip install -r requirements.txt`
 2. Put the raw file `online_retail_II.xlsx` in `data/raw/` (it is not committed; download it from https://archive.ics.uci.edu/dataset/502/online+retail+ii)
 3. From the project root, run `python src/DE6_run_all.py`
-4. This rebuilds everything from the raw file: the loaded and cleaned data, the time split, the sparse matrix, the matrix report, and the SVD error table and curve. Tables and figures are written to `outputs/` and the files containing customer IDs stay in `data/processed/`.
+4. This rebuilds everything from the raw file: the loaded and cleaned data, the time split, the sparse matrix, the matrix report, the SVD error table and curve, and the hit rate and timing table. Tables and figures are written to `outputs/` and the files containing customer IDs stay in `data/processed/`.
 5. Random seeds are fixed at 42 wherever randomness is used.
 
-Run steps for the remaining model scripts will be added here as they are written.
+Run steps for the remaining model scripts (ML5, ML6) will be added here as they are written.

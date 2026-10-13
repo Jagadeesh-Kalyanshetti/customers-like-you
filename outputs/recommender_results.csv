@@ -1,0 +1,9 @@
+measure,value
+k,200.0
+test_customers,1913.0
+heldout_pairs,44727.0
+hit_rate_at_10_svd,0.2148
+hit_rate_at_10_best_sellers,0.2687
+fit_seconds,0.42
+all_products_seconds,0.81
+all_customers_seconds,1.2
