@@ -54,6 +54,11 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 - The brief calls this one-command rebuild `build_matrix.py`; mine is `DE6_run_all.py`, and it will also run the model scripts once they exist
 - Model scripts are named by task (`ML2_...` and so on)
 
+### Method choice (ML1)
+- Main model: Truncated SVD, decided on 2026-10-13 before any model was fitted; PCA is run at the same k in ML5 for comparison
+- Reason: the matrix is 97.95% empty, SVD works on it as it is, and one fit gives customer and product factors together
+- Full note: `outputs/decision_note.md`
+
 ## Environment
 Python 3.14.8, in a conda environment named miniproj (conda 26.7.1; conda is optional, any Python environment works).
 
@@ -62,7 +67,7 @@ Packages and exact versions are in `requirements.txt`: matplotlib, numpy, openpy
 ## How to run
 1. Use Python 3.14 (I used 3.14.8) and install the packages: `pip install -r requirements.txt`
 2. Put the raw file `online_retail_II.xlsx` in `data/raw/` (it is not committed; download it from https://archive.ics.uci.edu/dataset/502/online+retail+ii)
-3. 3. From the project root, run `python src/DE6_run_all.py`
+3. From the project root, run `python src/DE6_run_all.py`
 4. This rebuilds everything from the raw file: the loaded and cleaned data, the time split, the sparse matrix, and the matrix report. Tables are written to `outputs/` and the files containing customer IDs stay in `data/processed/`.
 5. Random seeds are fixed at 42 wherever randomness is used.
 
