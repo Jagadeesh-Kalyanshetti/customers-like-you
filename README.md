@@ -46,11 +46,24 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 ### Matrix report (DE5)
 - Sparsity: the matrix is 97.95% empty (0.9795 of the 5,473 x 3,687 cells are zero)
 - Memory (MB = 1,000,000 bytes): a dense matrix would need about 161.43 MB; the sparse one needs about 4.99 MB (data, indices and indptr arrays together)
-- Full report: `outputs/matrix_report.csv`, written by `src/05_matrix_report.py`
-- Script numbering: the report is its own script (05), so the model scripts start at 06: `06_fit_models.py`, `07_recommend_evaluate.py`, `08_customer_map.py`
+- Full report: `outputs/matrix_report.csv`, written by `src/DE5_matrix_report.py`
+
+### Pipeline (DE6)
+- `src/DE6_run_all.py` runs the other scripts in `src/` in a fixed order: `DE1_load_data.py`, `DE2_clean_data.py`, `DE3_split_data.py`, `DE4_build_sparse_matrix.py`, `DE5_matrix_report.py`
+- Scripts don't share variables; each one reads the files the previous one saved in `data/processed/`
+- The brief calls this one-command rebuild `build_matrix.py`; mine is `DE6_run_all.py`, and it will also run the model scripts once they exist
+- Model scripts are named by task (`ML2_...` and so on)
 
 ## Environment
-conda environment: miniproj
+Python 3.14.8, in a conda environment named miniproj (conda 26.7.1; conda is optional, any Python environment works).
+
+Packages and exact versions are in `requirements.txt`: matplotlib, numpy, openpyxl, pandas, pyarrow, scikit-learn, scipy.
 
 ## How to run
-To be completed in the coming time.
+1. Use Python 3.14 (I used 3.14.8) and install the packages: `pip install -r requirements.txt`
+2. Put the raw file `online_retail_II.xlsx` in `data/raw/` (it is not committed; download it from https://archive.ics.uci.edu/dataset/502/online+retail+ii)
+3. 3. From the project root, run `python src/DE6_run_all.py`
+4. This rebuilds everything from the raw file: the loaded and cleaned data, the time split, the sparse matrix, and the matrix report. Tables are written to `outputs/` and the files containing customer IDs stay in `data/processed/`.
+5. Random seeds are fixed at 42 wherever randomness is used.
+
+Run steps for the model scripts will be added here when they exist.
