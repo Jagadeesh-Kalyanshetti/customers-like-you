@@ -12,6 +12,7 @@ SCRIPTS = [
     "src/DE5_matrix_report.py",
     "src/ML2_fit_svd.py",
     "src/ML4_evaluate.py",
+    "src/ML5_pca_vs_svd_fit.py",
 ]
 
 for script in SCRIPTS:

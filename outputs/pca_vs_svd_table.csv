@@ -1,0 +1,10 @@
+measure,pca,truncated_svd
+k used,200,200
+fit_seconds,0.64,0.42
+peak_memory_mb,31.1,34.2
+stored_factors_mb,14.69,14.66
+variance_explained,0.5748,not used
+relative_reconstruction_error,not used,0.6395
+hit_rate_at_10,0.218,0.2148
+best_seller_hit_rate_at_10,0.2687,0.2687
+component_1_in_words,"Mostly overall buying volume: correlation 0.97 with a customer's total log-quantity; top products are the best sellers, same as SVD","Overall buying volume: correlation 0.97 with a customer's total log-quantity; top products are the best sellers (cake cases, T-light holder, jumbo bag)"

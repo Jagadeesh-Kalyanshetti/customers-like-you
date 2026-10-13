@@ -49,8 +49,9 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 - Full report: `outputs/matrix_report.csv`, written by `src/DE5_matrix_report.py`
 
 ### Pipeline (DE6)
-- `src/DE6_run_all.py` runs the other scripts in `src/` in a fixed order: `DE1_load_data.py`, `DE2_clean_data.py`, `DE3_split_data.py`, `DE4_build_sparse_matrix.py`, `DE5_matrix_report.py`, `ML2_fit_svd.py`, `ML4_evaluate.py`
+- `src/DE6_run_all.py` runs the other scripts in `src/` in a fixed order: `DE1_load_data.py`, `DE2_clean_data.py`, `DE3_split_data.py`, `DE4_build_sparse_matrix.py`, `DE5_matrix_report.py`, `ML2_fit_svd.py`, `ML4_evaluate.py`, `ML5_pca_vs_svd_fit.py`
 - `ML3_recommend.py` is not in the run, because it saves nothing; ML4 repeats its logic for all customers at once
+- `ML5_pca_vs_svd_fit.py` comes after `ML4_evaluate.py` because it reads `outputs/recommender_results.csv`, which ML4 writes
 - Scripts don't share variables; each one reads the files the previous one saved in `data/processed/`
 - The brief calls this one-command rebuild `build_matrix.py`; mine is `DE6_run_all.py`, and it also runs the model scripts
 - Model scripts are named by task (`ML2_...` and so on)
@@ -85,6 +86,18 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 - Hypotheses for the loss, not tested: the held-out products are new to each customer and popular products are bought by many people, and suggestions built from a customer's own history lean towards niche products
 - File: `outputs/recommender_results.csv` (counts, rates and timings only, no customer IDs), written by `src/ML4_evaluate.py`
 
+### PCA vs SVD comparison (ML5)
+- `src/ML5_pca_vs_svd_fit.py` fits Truncated SVD and PCA on the same train-only matrix at the same k = 200 (seed 42). PCA uses the `arpack` solver, which centres the sparse matrix implicitly, so the matrix is never made dense
+- Both methods are scored the same way as in ML4 (product fingerprints scaled to length 1, taste profile from the plain matrix row, bought products excluded). Only the fingerprints differ. PCA's customer profile is not centred, which keeps the comparison to one change
+- The baseline hit rate is read from `outputs/recommender_results.csv`. The script checks that its fresh SVD hit rate matches ML4's, and stops if not. The held-out pairs are loaded only after both fits (R2)
+- Result (single run): hit rate at 10 is 0.2180 for PCA and 0.2148 for SVD, against 0.2687 for the best sellers. The gap between the two methods is 0.0032, about 6 of 1,913 test customers, which is too small to call a difference. **Both lose to the baseline**
+- Fit time: PCA 0.64 s, SVD 0.42 s. Both are fast
+- Peak memory during fit: PCA 31.1 MB, SVD 34.2 MB, measured with `tracemalloc` (MB = 1,000,000 bytes). This is the peak memory allocated by Python and NumPy, not the whole process, so memory allocated inside the compiled solver code may be undercounted. The caveat is the same for both methods, so I treat the two as about equal and do not claim that PCA needs less
+- Stored factors: SVD about 14.66 MB; PCA about 14.69 MB, because it also stores one column-average number per product
+- The two quality numbers are different things and must not be subtracted: PCA keeps 0.5748 of the spread around the average customer (variance explained); SVD loses 0.6395 of the size of the matrix (relative reconstruction error, from ML2)
+- Component 1: for both methods it is overall buying volume. Its customer score correlates 0.97 with a customer's total log-quantity, and its top products are best sellers (cake cases, white hanging heart T-light holder, jumbo bag, lunch bag). Centring did not change this. The correlation came from a one-off check that is not kept in the script; the sentence in the table records it
+- File: `outputs/pca_vs_svd_table.csv` (the brief's comparison table, no customer IDs), written by `src/ML5_pca_vs_svd_fit.py`
+
 ## Environment
 Python 3.14.8, in a conda environment named miniproj (conda 26.7.1; conda is optional, any Python environment works).
 
@@ -94,7 +107,4 @@ Packages and exact versions are in `requirements.txt`: matplotlib, numpy, openpy
 1. Use Python 3.14 (I used 3.14.8) and install the packages: `pip install -r requirements.txt`
 2. Put the raw file `online_retail_II.xlsx` in `data/raw/` (it is not committed; download it from https://archive.ics.uci.edu/dataset/502/online+retail+ii)
 3. From the project root, run `python src/DE6_run_all.py`
-4. This rebuilds everything from the raw file: the loaded and cleaned data, the time split, the sparse matrix, the matrix report, the SVD error table and curve, and the hit rate and timing table. Tables and figures are written to `outputs/` and the files containing customer IDs stay in `data/processed/`.
-5. Random seeds are fixed at 42 wherever randomness is used.
-
-Run steps for the remaining model scripts (ML5, ML6) will be added here as they are written.
+4. This rebuilds everything from the raw file: the loaded and cleaned data, the time split, the sparse matrix, the matrix report, the SVD error table and curve, the hit rate and timing table, and the PCA vs SVD comparison table.
