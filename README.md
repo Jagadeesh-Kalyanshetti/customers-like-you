@@ -35,6 +35,14 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 - Counts per step: `outputs/split_summary.csv`
 - `data/processed/train.parquet` and `test_pairs.parquet` are not committed (they contain customer IDs)
 
+### Matrix (DE4)
+- Built from train only (R2): one row per customer, one column per product, stored sparse
+- Each cell holds log1p of the customer's summed quantity for that product
+- Product filter: kept products bought by at least 10 customers in train. Of 4,529 products in train, 3,687 are kept (842 dropped, about 19% of 4,529)
+- Matrix: 5,473 customers x 3,687 products with 413,927 filled cells. The 417,719 train pairs shrink to 413,927 after the filter (3,792 dropped)
+- Held-out pairs after the filter: 45,753 shrink to 44,727 (1,026 dropped, about 2% of 45,753) because their product has no column. Test customers: 1,916 shrink to 1,913
+- Files in `data/processed/` (not committed, they contain customer IDs): `sparse_customer_product_matrix.npz`, `customer_index.parquet`, `product_index.parquet`, `test_pairs_final.parquet`. The position in each index file is the matrix row or column number
+
 ## Environment
 conda environment: miniproj
 
