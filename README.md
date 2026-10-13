@@ -49,10 +49,11 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 - Full report: `outputs/matrix_report.csv`, written by `src/DE5_matrix_report.py`
 
 ### Pipeline (DE6)
-- `src/DE6_run_all.py` runs the other scripts in `src/` in a fixed order: `DE1_load_data.py`, `DE2_clean_data.py`, `DE3_split_data.py`, `DE4_build_sparse_matrix.py`, `DE5_matrix_report.py`, `ML2_fit_svd.py`, `ML4_evaluate.py`, `ML5_pca_vs_svd_fit.py`
+- `src/DE6_run_all.py` runs the other scripts in `src/` in a fixed order: `DE1_load_data.py`, `DE2_clean_data.py`, `DE3_split_data.py`, `DE4_build_sparse_matrix.py`, `DE5_matrix_report.py`, `ML2_fit_svd.py`, `ML4_evaluate.py`, `ML5_pca_vs_svd_fit.py`, `ML6_customer_map.py`
 - `ML3_recommend.py` is not in the run, because it saves nothing; ML4 repeats its logic for all customers at once
 - `ML5_pca_vs_svd_fit.py` comes after `ML4_evaluate.py` because it reads `outputs/recommender_results.csv`, which ML4 writes
-- Scripts don't share variables; each one reads the files the previous one saved in `data/processed/`
+- `ML6_customer_map.py` only reads files from `data/processed/`, so its place in the order does not matter; it is last
+- Scripts don't share variables; each one reads the files the previous one saved in `data/processed/` (or `outputs/`)
 - The brief calls this one-command rebuild `build_matrix.py`; mine is `DE6_run_all.py`, and it also runs the model scripts
 - Model scripts are named by task (`ML2_...` and so on)
 
@@ -98,6 +99,24 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 - Component 1: for both methods it is overall buying volume. Its customer score correlates 0.97 with a customer's total log-quantity, and its top products are best sellers (cake cases, white hanging heart T-light holder, jumbo bag, lunch bag). Centring did not change this. The correlation came from a one-off check that is not kept in the script; the sentence in the table records it
 - File: `outputs/pca_vs_svd_table.csv` (the brief's comparison table, no customer IDs), written by `src/ML5_pca_vs_svd_fit.py`
 
+### Customer map (ML6)
+- `src/ML6_customer_map.py` fits a separate Truncated SVD with 2 components on the same train-only matrix (seed 42). Each customer gets two scores, which are the x and y of one dot. This is not the k = 200 model used for the recommender
+- Customers are grouped with k-means (seed 42, `n_init=10`) for 3, 4, 5 and 6 groups. I kept the number of groups with the highest silhouette score: 0.6814 for 3, 0.5562 for 4, 0.5384 for 5 and 0.5619 for 6, so **3 groups**. The silhouette score is my own choice of measure; the brief only asks for 3 to 6 groups
+- The groups are mainly volume tiers. The dots stretch along component 1, and the three groups are cut along that axis. I labelled component 1 "overall buying volume" from the ML5 check on the 200-component fit; I did not run a separate correlation for the 2-component fit. The groups say how much a customer buys more than what kind of products they buy
+- Each group is described by its size, the average number of distinct products per customer, its top 5 products and its top 3 countries. Top products are the ones where the group's share of buyers is furthest above the share among all customers, because best sellers would otherwise appear in every list. Each customer's country is the first one listed for them in the cleaned table
+
+| Segment (my name) | Customers | Share of customers | Distinct products per customer | Top countries |
+|---|---|---|---|---|
+| Occasional small buyers | 4,748 | 87% | 48.3 | United Kingdom 92%, Germany 1%, France 1% |
+| Regular core buyers | 712 | 13% | 238.4 | United Kingdom 88%, Germany 4%, France 2% |
+| Largest accounts | 13 | 0.2% | 1,146.2 | United Kingdom 69%, EIRE 15%, Australia 8% |
+
+- Regular core buyers: the top products are retro-spot cake cases and lunch bags and the red and white spotty jumbo bag. Largest accounts: retro-spot wall tidy and container set, lunch bags, jumbo bags. For the largest accounts the country shares are about 9, 2 and 1 customers out of 13, so they are tiny counts
+- Occasional small buyers are 87% of customers, so they cannot differ much from "everyone", and their top-product list (glass charms, hydrangea, candles, bracelet) should not be over-read
+- The names are my own reading of size, products per customer, top products and countries. "Wholesale" is not used, because the data does not show who is a wholesaler
+- The figure has no labels on dots and no customer IDs (R4). The CSVs hold only counts, product names and countries
+- Files: `outputs/customer_map.png`, `outputs/segment_profiles.csv` and `outputs/cluster_choice.csv` (silhouette per number of groups), written by `src/ML6_customer_map.py`
+
 ## Environment
 Python 3.14.8, in a conda environment named miniproj (conda 26.7.1; conda is optional, any Python environment works).
 
@@ -107,4 +126,5 @@ Packages and exact versions are in `requirements.txt`: matplotlib, numpy, openpy
 1. Use Python 3.14 (I used 3.14.8) and install the packages: `pip install -r requirements.txt`
 2. Put the raw file `online_retail_II.xlsx` in `data/raw/` (it is not committed; download it from https://archive.ics.uci.edu/dataset/502/online+retail+ii)
 3. From the project root, run `python src/DE6_run_all.py`
-4. This rebuilds everything from the raw file: the loaded and cleaned data, the time split, the sparse matrix, the matrix report, the SVD error table and curve, the hit rate and timing table, and the PCA vs SVD comparison table.
+4. This rebuilds everything from the raw file: the loaded and cleaned data, the time split, the sparse matrix, the matrix report, the SVD error table and curve, the hit rate and timing table, the PCA vs SVD comparison table, and the customer map with its segment table. Tables and figures are written to `outputs/` and the files containing customer IDs stay in `data/processed/`.
+5. Random seeds are fixed at 42 wherever randomness is used.
