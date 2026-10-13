@@ -63,7 +63,7 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 - Truncated SVD is fitted on the train-only matrix for k = 10, 20, 50, 100 and 200 (seed 42)
 - Relative reconstruction error = size of what is lost / size of the whole matrix (Frobenius norm). It is computed from the customer factors with Pythagoras (whole squared = rebuilt squared + lost squared), so the dense matrix is never rebuilt
 - The error falls steadily from 0.8761 at k = 10 to 0.6395 at k = 200, with no sharp elbow: even at k = 200 about 64% of the matrix is still lost. This is reconstruction error only; it says nothing yet about recommendation quality (ML4)
-- Working choice: k = 50 (error 0.7897). The curve cannot pick k alone, so 50 is mid-range, matches the brief's example and keeps the stored factors small (50 x (5,473 + 3,687) x 8 bytes is about 3.66 MB, against 161.43 MB dense). It will not be changed after seeing the held-out hit rate
+- Chosen k = 200 (error 0.6395, the lowest of the five). The curve has no elbow, so I took the lowest error. The stored factors are 200 x (5,473 + 3,687) x 8 bytes, about 14.66 MB, against 161.43 MB dense. Lower reconstruction error does not prove better recommendations; ML4 tests that. k was fixed before any held-out scoring and will not be changed after it
 - Files: `outputs/svd_reconstruction_error.csv` and `outputs/svd_error_curve.png`, written by `src/ML2_fit_svd.py`
 
 ## Environment
@@ -78,4 +78,4 @@ Packages and exact versions are in `requirements.txt`: matplotlib, numpy, openpy
 4. This rebuilds everything from the raw file: the loaded and cleaned data, the time split, the sparse matrix, the matrix report, and the SVD error table and curve. Tables and figures are written to `outputs/` and the files containing customer IDs stay in `data/processed/`.
 5. Random seeds are fixed at 42 wherever randomness is used.
 
-Run steps for the remaining model scripts will be added here as & when i work through them. 
+Run steps for the remaining model scripts will be added here as they are written.
