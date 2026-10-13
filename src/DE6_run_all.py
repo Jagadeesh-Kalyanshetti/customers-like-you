@@ -10,6 +10,7 @@ SCRIPTS = [
     "src/DE3_split_data.py",
     "src/DE4_build_sparse_matrix.py",
     "src/DE5_matrix_report.py",
+    "src/ML2_fit_svd.py"
 ]
 
 for script in SCRIPTS:

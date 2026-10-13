@@ -49,15 +49,22 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 - Full report: `outputs/matrix_report.csv`, written by `src/DE5_matrix_report.py`
 
 ### Pipeline (DE6)
-- `src/DE6_run_all.py` runs the other scripts in `src/` in a fixed order: `DE1_load_data.py`, `DE2_clean_data.py`, `DE3_split_data.py`, `DE4_build_sparse_matrix.py`, `DE5_matrix_report.py`
+- `src/DE6_run_all.py` runs the other scripts in `src/` in a fixed order: `DE1_load_data.py`, `DE2_clean_data.py`, `DE3_split_data.py`, `DE4_build_sparse_matrix.py`, `DE5_matrix_report.py`, `ML2_fit_svd.py`
 - Scripts don't share variables; each one reads the files the previous one saved in `data/processed/`
-- The brief calls this one-command rebuild `build_matrix.py`; mine is `DE6_run_all.py`, and it will also run the model scripts once they exist
+- The brief calls this one-command rebuild `build_matrix.py`; mine is `DE6_run_all.py`, and it also runs the model scripts
 - Model scripts are named by task (`ML2_...` and so on)
 
 ### Method choice (ML1)
 - Main model: Truncated SVD, decided on 2026-10-13 before any model was fitted; PCA is run at the same k in ML5 for comparison
 - Reason: the matrix is 97.95% empty, SVD works on it as it is, and one fit gives customer and product factors together
 - Full note: `outputs/decision_note.md`
+
+### SVD fit and choice of k (ML2)
+- Truncated SVD is fitted on the train-only matrix for k = 10, 20, 50, 100 and 200 (seed 42)
+- Relative reconstruction error = size of what is lost / size of the whole matrix (Frobenius norm). It is computed from the customer factors with Pythagoras (whole squared = rebuilt squared + lost squared), so the dense matrix is never rebuilt
+- The error falls steadily from 0.8761 at k = 10 to 0.6395 at k = 200, with no sharp elbow: even at k = 200 about 64% of the matrix is still lost. This is reconstruction error only; it says nothing yet about recommendation quality (ML4)
+- Working choice: k = 50 (error 0.7897). The curve cannot pick k alone, so 50 is mid-range, matches the brief's example and keeps the stored factors small (50 x (5,473 + 3,687) x 8 bytes is about 3.66 MB, against 161.43 MB dense). It will not be changed after seeing the held-out hit rate
+- Files: `outputs/svd_reconstruction_error.csv` and `outputs/svd_error_curve.png`, written by `src/ML2_fit_svd.py`
 
 ## Environment
 Python 3.14.8, in a conda environment named miniproj (conda 26.7.1; conda is optional, any Python environment works).
@@ -68,7 +75,7 @@ Packages and exact versions are in `requirements.txt`: matplotlib, numpy, openpy
 1. Use Python 3.14 (I used 3.14.8) and install the packages: `pip install -r requirements.txt`
 2. Put the raw file `online_retail_II.xlsx` in `data/raw/` (it is not committed; download it from https://archive.ics.uci.edu/dataset/502/online+retail+ii)
 3. From the project root, run `python src/DE6_run_all.py`
-4. This rebuilds everything from the raw file: the loaded and cleaned data, the time split, the sparse matrix, and the matrix report. Tables are written to `outputs/` and the files containing customer IDs stay in `data/processed/`.
+4. This rebuilds everything from the raw file: the loaded and cleaned data, the time split, the sparse matrix, the matrix report, and the SVD error table and curve. Tables and figures are written to `outputs/` and the files containing customer IDs stay in `data/processed/`.
 5. Random seeds are fixed at 42 wherever randomness is used.
 
-Run steps for the model scripts will be added here when they exist.
+Run steps for the remaining model scripts will be added here as & when i work through them. 
