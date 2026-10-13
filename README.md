@@ -66,6 +66,14 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 - Chosen k = 200 (error 0.6395, the lowest of the five). The curve has no elbow, so I took the lowest error. The stored factors are 200 x (5,473 + 3,687) x 8 bytes, about 14.66 MB, against 161.43 MB dense. Lower reconstruction error does not prove better recommendations; ML4 tests that. k was fixed before any held-out scoring and will not be changed after it
 - Files: `outputs/svd_reconstruction_error.csv` and `outputs/svd_error_curve.png`, written by `src/ML2_fit_svd.py`
 
+### Recommender (ML3)
+- `src/ML3_recommend.py` fits Truncated SVD on the train-only matrix at k = 200 (seed 42) and defines two functions. It saves no file, because the brief's ML3 output is the recommendation function itself
+- Each product gets a fingerprint of 200 numbers (a row of `svd.components_.T`), scaled to length 1, so multiplying two fingerprints gives their cosine similarity
+- `similar_products(product_number)` returns the 10 products most similar to one product
+- `recommend(customer_number)` mixes the fingerprints of the products a customer bought (weighted by their matrix values) into one taste profile, scores every product against it, removes products they already bought, and returns the top 10
+- Both functions return matrix column numbers; `product_index.parquet` turns them into StockCodes. Customer numbers are matrix row positions, not customer IDs
+- Quality is not tested here; the hit rate against the best-seller baseline comes in ML4
+
 ## Environment
 Python 3.14.8, in a conda environment named miniproj (conda 26.7.1; conda is optional, any Python environment works).
 
