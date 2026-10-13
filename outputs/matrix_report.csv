@@ -1,0 +1,11 @@
+item,value
+products_in_train,4529
+products_kept,3687
+customers_rows,5473
+products_columns,3687
+filled_cells,413927
+sparsity,0.9795
+dense_mb,161.43
+sparse_mb,4.99
+heldout_pairs,44727
+heldout_customers,1913

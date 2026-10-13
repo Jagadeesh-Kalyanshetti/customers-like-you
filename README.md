@@ -40,8 +40,14 @@ Source: UCI Online Retail II (`online_retail_II.xlsx`, two sheets: 2009-2010 and
 - Each cell holds log1p of the customer's summed quantity for that product
 - Product filter: kept products bought by at least 10 customers in train. Of 4,529 products in train, 3,687 are kept (842 dropped, about 19% of 4,529)
 - Matrix: 5,473 customers x 3,687 products with 413,927 filled cells. The 417,719 train pairs shrink to 413,927 after the filter (3,792 dropped)
-- Held-out pairs after the filter: 45,753 shrink to 44,727 (1,026 dropped, about 2% of 45,753) because their product has no column. Test customers: 1,916 shrink to 1,913
+- Held-out pairs after the filter: 45,753 shrink to 44,727 (1,026 dropped, about 2% of 45,753) because their product has no column or their customer has no row. Test customers: 1,916 shrink to 1,913
 - Files in `data/processed/` (not committed, they contain customer IDs): `sparse_customer_product_matrix.npz`, `customer_index.parquet`, `product_index.parquet`, `test_pairs_final.parquet`. The position in each index file is the matrix row or column number
+
+### Matrix report (DE5)
+- Sparsity: the matrix is 97.95% empty (0.9795 of the 5,473 x 3,687 cells are zero)
+- Memory (MB = 1,000,000 bytes): a dense matrix would need about 161.43 MB; the sparse one needs about 4.99 MB (data, indices and indptr arrays together)
+- Full report: `outputs/matrix_report.csv`, written by `src/05_matrix_report.py`
+- Script numbering: the report is its own script (05), so the model scripts start at 06: `06_fit_models.py`, `07_recommend_evaluate.py`, `08_customer_map.py`
 
 ## Environment
 conda environment: miniproj
